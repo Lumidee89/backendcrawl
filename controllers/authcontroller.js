@@ -118,3 +118,28 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 };
+
+// Resend OTP
+exports.resendOtp = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: 'User not found' });
+
+    if (!user.isVerified) {
+      user.otp = generateOtp();
+      await user.save();
+
+      // Send OTP to email
+      await sendEmail(user.email, 'OTP Verification', `Your new OTP is ${user.otp}`);
+
+      res.status(200).json({ msg: 'New OTP sent to your email' });
+    } else {
+      res.status(400).json({ msg: 'Account is already verified' });
+    }
+  } catch (error) {
+    res.status(500).json({ msg: 'Server error', error: error.message });
+  }
+};
+
