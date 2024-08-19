@@ -21,6 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.2",
     "nodemailer": "^6.9.14",
+    "openai": "^4.56.0",
     "string-similarity": "^4.0.4",
     "whois": "^2.14.2"
   }
