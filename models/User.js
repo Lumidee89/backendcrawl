@@ -9,10 +9,7 @@ const UserSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: false },
 });
 
-<<<<<<< HEAD
 // Hash the password before saving the user
-=======
->>>>>>> f5a0024 (first commit)
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);

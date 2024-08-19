@@ -7,6 +7,8 @@ const contentAnalysisRoute = require('./routes/contentAnalysisRoute');
 const ipRoutes = require('./routes/ipRoutes');
 const violationRoutes = require('./routes/violationRoutes');
 const speedRoutes = require('./routes/speedRoute');
+const adRoutes = require('./routes/adRoutes');
+const aiInsightsRoutes = require('./routes/aiInsightsRoutes');
 
 require("dotenv").config();
 
@@ -49,6 +51,8 @@ app.use("/api", contentAnalysisRoute);
 app.use("/api", ipRoutes);
 app.use("/api", violationRoutes);
 app.use('/api/speed', speedRoutes);
+app.use('/api/ads', adRoutes);
+app.use('/api', aiInsightsRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

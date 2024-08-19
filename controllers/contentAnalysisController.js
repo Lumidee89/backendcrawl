@@ -1,11 +1,7 @@
 const axios = require('axios');
 const { performance } = require('perf_hooks');
 
-<<<<<<< HEAD
 // Function to analyze website speed
-=======
-
->>>>>>> f5a0024 (first commit)
 const analyzeWebsiteSpeed = async (req, res) => {
     const { website } = req.body;
 
@@ -14,11 +10,7 @@ const analyzeWebsiteSpeed = async (req, res) => {
     }
 
     try {
-<<<<<<< HEAD
         // Measure the time it takes to make a request
-=======
-
->>>>>>> f5a0024 (first commit)
         const start = performance.now();
 
         await axios.get(website);
@@ -26,11 +18,7 @@ const analyzeWebsiteSpeed = async (req, res) => {
         const end = performance.now();
         const duration = end - start;
 
-<<<<<<< HEAD
         // Respond with the time taken
-=======
-
->>>>>>> f5a0024 (first commit)
         res.json({
             message: 'Website speed analysis completed',
             website,

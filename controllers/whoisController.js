@@ -12,22 +12,14 @@ exports.lookup = (req, res) => {
       return res.status(500).json({ msg: 'Error performing WHOIS lookup', error: err });
     }
 
-<<<<<<< HEAD
     // Format the raw data into a structured JSON object
-=======
-
->>>>>>> f5a0024 (first commit)
     const formattedData = formatWhoisData(data);
 
     res.status(200).json({ domain, whoisData: formattedData });
   });
 };
 
-<<<<<<< HEAD
 // Helper function to format WHOIS data
-=======
-
->>>>>>> f5a0024 (first commit)
 const formatWhoisData = (data) => {
   const lines = data.split('\n');
   const formattedData = {};
@@ -38,11 +30,7 @@ const formatWhoisData = (data) => {
     const formattedValue = value.join(':').trim();
 
     if (formattedKey) {
-<<<<<<< HEAD
       // Handle known WHOIS fields
-=======
-
->>>>>>> f5a0024 (first commit)
       switch (formattedKey) {
         case 'Domain Name':
         case 'Registrar':
@@ -73,11 +61,7 @@ const formatWhoisData = (data) => {
   return cleanUpData(formattedData);
 };
 
-<<<<<<< HEAD
 // Helper function to clean up and format the data
-=======
-
->>>>>>> f5a0024 (first commit)
 const cleanUpData = (data) => {
   const cleanedData = {};
 
