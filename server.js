@@ -1,14 +1,16 @@
 const express = require("express");
-const cors = require("cors"); // Import CORS
+const cors = require("cors");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const whoisRoutes = require("./routes/whois");
 const contentAnalysisRoute = require('./routes/contentAnalysisRoute');
 const ipRoutes = require('./routes/ipRoutes');
+const checkBlockedIp = require('./middleware/ipBlockMiddleware');
 const violationRoutes = require('./routes/violationRoutes');
 const speedRoutes = require('./routes/speedRoute');
 const adRoutes = require('./routes/adRoutes');
 const aiInsightsRoutes = require('./routes/aiInsightsRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 
 require("dotenv").config();
 
@@ -19,6 +21,8 @@ connectDB();
 
 // Middleware
 app.use(express.json());
+
+app.use(checkBlockedIp);
 
 // Allowed CORS Origin
 const allowedOrigins = [
@@ -53,6 +57,7 @@ app.use("/api", violationRoutes);
 app.use('/api/speed', speedRoutes);
 app.use('/api/ads', adRoutes);
 app.use('/api', aiInsightsRoutes);
+app.use('/api/profile', profileRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

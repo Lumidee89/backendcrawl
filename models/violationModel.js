@@ -4,11 +4,7 @@ const contentAnalysisSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-<<<<<<< HEAD
         ref: 'User' // Assuming you have a User model
-=======
-        ref: 'User' 
->>>>>>> f5a0024 (first commit)
     },
     website: {
         type: String,
