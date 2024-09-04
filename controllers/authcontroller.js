@@ -6,29 +6,32 @@ const jwt = require('jsonwebtoken');
 
 // Register User
 exports.register = async (req, res) => {
-    const { fullName, email, password, confirmPassword } = req.body;
-  
-    if (password !== confirmPassword) {
-      return res.status(400).json({ msg: 'Passwords do not match' });
-    }
-  
-    try {
-      let user = await User.findOne({ email });
-      if (user) return res.status(400).json({ msg: 'User already exists' });
-  
-      user = new User({ fullName, email, password });
-      user.otp = generateOtp();
-  
-      await user.save();
-  
-      // Send OTP to email
-      await sendEmail(user.email, 'OTP Verification', `Your OTP is ${user.otp}`);
-  
-      res.status(200).json({ msg: 'Registration successful, OTP sent to your email' });
-    } catch (error) {
-      res.status(500).json({ msg: 'Server error' });
-    }
-  };
+  const { fullName, email, password, confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    return res.status(400).json({ msg: 'Passwords do not match' });
+  }
+
+  try {
+    let user = await User.findOne({ email });
+    if (user) return res.status(400).json({ msg: 'User already exists' });
+
+    // Create new user with OTP
+    user = new User({ fullName, email, password });
+    user.otp = generateOtp();  // Generate OTP
+    user.otpCreatedAt = new Date();  // Store OTP generation time
+
+    await user.save();  // Save user with OTP and timestamp
+
+    // Send OTP to email
+    await sendEmail(user.email, 'OTP Verification', `Your OTP is ${user.otp}`);
+
+    res.status(200).json({ msg: 'Registration successful, OTP sent to your email' });
+  } catch (error) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+};
+
 
 // Verify OTP
 exports.verifyOtp = async (req, res) => {
@@ -37,12 +40,25 @@ exports.verifyOtp = async (req, res) => {
   try {
     const user = await User.findOne({ email });
 
-    if (!user || user.otp !== otp) {
+    if (!user) {
+      return res.status(400).json({ msg: 'User not found' });
+    }
+
+    // Optionally check if the OTP has expired
+    const otpExpiryDuration = 15 * 60 * 1000;  // OTP valid for 15 minutes
+    const currentTime = Date.now();
+
+    if (currentTime - new Date(user.otpCreatedAt).getTime() > otpExpiryDuration) {
+      return res.status(400).json({ msg: 'OTP has expired' });
+    }
+
+    if (user.otp !== otp) {
       return res.status(400).json({ msg: 'Invalid OTP' });
     }
 
-    user.isVerified = true;
-    user.otp = undefined;
+    user.isVerified = true;  // Mark user as verified
+    user.otp = undefined;  // Clear OTP after verification
+    user.otpCreatedAt = undefined;  // Clear OTP creation time
     await user.save();
 
     res.status(200).json({ msg: 'OTP verified, account activated' });
@@ -50,6 +66,7 @@ exports.verifyOtp = async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 };
+
 
 // Login User
 exports.login = async (req, res) => {
@@ -89,8 +106,11 @@ exports.forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: 'User not found' });
 
+    // Generate new OTP and timestamp
     user.otp = generateOtp();
-    await user.save();
+    user.otpCreatedAt = new Date();  // Store OTP generation time
+
+    await user.save();  // Save user with new OTP and timestamp
 
     // Send OTP to email
     await sendEmail(user.email, 'Password Reset OTP', `Your OTP is ${user.otp}`);
@@ -100,6 +120,7 @@ exports.forgotPassword = async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 };
+
 
 // Reset Password
 exports.resetPassword = async (req, res) => {
