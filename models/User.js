@@ -8,6 +8,8 @@ const UserSchema = new mongoose.Schema({
     phoneNumber: { type: String },
     about: { type: String },
     isVerified: { type: Boolean, default: false },
+    otp: { type: String },  
+    otpCreatedAt: { type: Date },  
 });
 
 // Hash the password before saving the user
