@@ -4,6 +4,8 @@ const axios = require("axios");
 let ipData = {}; // To store detected IP information
 let blockedIps = new Set(); // To store blocked IPs
 
+let websiteData = {}; // To store website data with multiple IPs information
+
 // Analyze the website and store IP data along with location information
 exports.analyzeWebsite = async (req, res) => {
   const { website } = req.body;
@@ -22,9 +24,11 @@ exports.analyzeWebsite = async (req, res) => {
           .json({ message: "Error resolving website IP", error: err });
       }
 
-      // Check if the IP is already blocked
-      if (blockedIps.has(address)) {
-        return res.status(403).json({ message: "This IP is blocked" });
+      if (!websiteData[website]) {
+        websiteData[website] = {
+          totalAccessCount: 0,
+          ipDetails: {},
+        };
       }
 
       // Fetch location data based on IP address
@@ -33,8 +37,8 @@ exports.analyzeWebsite = async (req, res) => {
       );
       const locationData = locationResponse.data;
 
-      if (!ipData[website]) {
-        ipData[website] = {
+      if (!websiteData[website].ipDetails[address]) {
+        websiteData[website].ipDetails[address] = {
           ipAddress: address,
           accessCount: 0,
           lastAccessed: new Date(),
@@ -43,20 +47,18 @@ exports.analyzeWebsite = async (req, res) => {
         };
       }
 
-      ipData[website].accessCount++;
-      ipData[website].lastAccessed = new Date();
-      ipData[website].logs.push({
-        ipAddress: address,
+      websiteData[website].totalAccessCount++;
+      websiteData[website].ipDetails[address].accessCount++;
+      websiteData[website].ipDetails[address].lastAccessed = new Date();
+      websiteData[website].ipDetails[address].logs.push({
         timestamp: new Date(),
-        location: locationData,
       });
 
       res.json({
         message: "Website analyzed successfully",
-        data: ipData[website],
+        data: websiteData[website],
       });
     });
-    DD;
   } catch (error) {
     return res.status(500).json({
       message: "An error occurred while analyzing the website",
