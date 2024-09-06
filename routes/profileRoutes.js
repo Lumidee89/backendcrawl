@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { updateProfile, profileController, updateProfilePicture, deleteAccount } = require('../controllers/profileController');
+const { updateProfile, profileController, deleteAccount } = require('../controllers/profileController');
 const authMiddleware = require('../middleware/authMiddleware'); 
 const multer = require('multer');
 
@@ -24,4 +24,4 @@ const upload = multer({
     limits: { fileSize: 1000000 }, 
 }).single('profilePicture');
 
-router.put('/update-profile-picture', upload, profileController.updateProfilePicture);
+router.put('/update-profile-picture', upload, profileController);
