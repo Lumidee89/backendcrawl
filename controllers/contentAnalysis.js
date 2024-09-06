@@ -2,17 +2,19 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
 
-const googleApiKey = 'AIzaSyB1nxI9X6p-SZPn0_opZlaxS12ux3myNtI';
-const customSearchEngineId = '24c939fb91645401e';
+const googleApiKey = 'AIzaSyCTjYQIUUyTDgty7bDdOn0ZQunf-ItIDWs';
+const customSearchEngineId = '00f00fecc2109450f';
 
 async function analyzeWebsite(url, referenceContent) {
     try {
+        url = normalizeUrl(url);
+
         const { data } = await axios.get(url);
         const $ = cheerio.load(data);
         const websiteContent = $('body').text();
-        
+
         const similarityScore = stringSimilarity.compareTwoStrings(websiteContent, referenceContent);
-        const impactScore = Math.min(100, websiteContent.length / 100); 
+        const impactScore = Math.min(100, websiteContent.length / 100);
 
         const similarContentDetails = await getSimilarContentDetails(websiteContent, url);
 
@@ -20,13 +22,21 @@ async function analyzeWebsite(url, referenceContent) {
             domain: url,
             similarityScore,
             impactScore,
-            similarContentDetails,  
-            analysisDate: new Date().toISOString() 
+            similarContentDetails,
+            analysisDate: new Date().toISOString(),
         };
     } catch (error) {
         console.error('Error analyzing website:', error);
         throw new Error('Content analysis failed');
     }
+}
+
+function normalizeUrl(url) {
+    if (!/^https?:\/\//i.test(url)) {
+        url = `https://${url}`;
+    }
+
+    return url;
 }
 
 async function getSimilarContentDetails(inputContent, domain) {

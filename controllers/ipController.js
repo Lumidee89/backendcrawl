@@ -39,7 +39,7 @@ exports.analyzeWebsite = async (req, res) => {
           accessCount: 0,
           lastAccessed: new Date(),
           logs: [],
-          location: locationData, // Include location data
+          location: locationData,
         };
       }
 
@@ -48,6 +48,7 @@ exports.analyzeWebsite = async (req, res) => {
       ipData[website].logs.push({
         ipAddress: address,
         timestamp: new Date(),
+        location: locationData,
       });
 
       res.json({
@@ -55,6 +56,7 @@ exports.analyzeWebsite = async (req, res) => {
         data: ipData[website],
       });
     });
+    DD;
   } catch (error) {
     return res.status(500).json({
       message: "An error occurred while analyzing the website",
