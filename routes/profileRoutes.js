@@ -1,27 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const { updateProfile, profileController, deleteAccount } = require('../controllers/profileController');
-const authMiddleware = require('../middleware/authMiddleware'); 
 const multer = require('multer');
+const path = require('path'); // Add this to use `path`
+const profileController = require('../controllers/profileController'); // Make sure this import is correct
 
-router.use(authMiddleware);
+const authMiddleware = require('../middleware/authMiddleware'); // Auth middleware
 
-router.put('/update', updateProfile);
+router.use(authMiddleware); // Apply auth middleware to all routes
 
-router.delete('/delete', deleteAccount);
+// Update profile
+router.put('/update', profileController.updateProfile);
 
-module.exports = router;
+// Delete account
+router.delete('/delete', profileController.deleteAccount);
 
+// Set up multer storage for file uploads
 const storage = multer.diskStorage({
-    destination: './uploads/',
+    destination: './uploads/', // Destination folder for uploaded files
     filename: (req, file, cb) => {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname)); // Unique file name
     }
 });
 
+// Set upload settings with limits and multer config
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 1000000 }, 
-}).single('profilePicture');
+    limits: { fileSize: 1000000 } // Limit file size to 1MB
+}).single('profilePicture'); // Handle single file upload with the fieldname 'profilePicture'
 
-router.put('/update-profile-picture', upload, profileController);
+// Update profile picture route
+router.put('/update-profile-picture', upload, profileController.updateProfilePicture);
+
+module.exports = router;
