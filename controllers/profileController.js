@@ -69,12 +69,12 @@ exports.updatePassword = async (req, res) => {
 
 // Update Profile Picture
 exports.updateProfilePicture = async (req, res) => {
-  if (!req.user) {
+  if (!req.userId) {
     return res.status(401).json({ msg: "Unauthorized" });
   }
 
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.userId);
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
@@ -96,12 +96,12 @@ exports.updateProfilePicture = async (req, res) => {
 
 // Delete Account
 exports.deleteAccount = async (req, res) => {
-  if (!req.user) {
+  if (!req.userId) {
     return res.status(401).json({ msg: "Unauthorized" });
   }
 
   try {
-    const user = await User.findByIdAndDelete(req.user._id);
+    const user = await User.findByIdAndDelete(req.userId);
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
