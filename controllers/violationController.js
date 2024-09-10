@@ -1,118 +1,97 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const openai = require('openai'); // Use the OpenAI API
-const stringSimilarity = require('string-similarity');
+const axios = require("axios");
+const cheerio = require("cheerio");
+const stringSimilarity = require("string-similarity");
 
-// Setup OpenAI API Key
-openai.apiKey = process.env.OPENAI_API_KEY;
+// Replace with your Scraper API key
+const SCRAPER_API_KEY = "934259ada971480167484c089f42b5ba";
+const SCRAPER_API_URL = "http://api.scraperapi.com";
 
+// Predefined policy violations and keywords
 const policyViolations = [
-    'spam',
-    'malware',
-    'phishing',
-    'pornographic content',
-    'abusive language'
+  "spam",
+  "malware",
+  "phishing",
+  "pornographic content",
+  "abusive language",
 ];
 
 const violationKeywords = {
-    spam: ['buy now', 'click here', 'free money'],
-    malware: ['download trojan', 'install virus'],
-    phishing: ['enter your credit card', 'password reset'],
-    pornographic: ['explicit content', 'adult videos'],
-    abusive: ['hate speech', 'offensive language']
+  spam: ["buy now", "click here", "free money"],
+  malware: ["download trojan", "install virus"],
+  phishing: ["enter your credit card", "password reset"],
+  pornographic: ["explicit content", "adult videos"],
+  abusive: ["hate speech", "offensive language"],
 };
 
-// Analyze website for policy violations using AI and predefined keywords
+// Analyze website for policy violations using predefined keywords
 exports.checkViolations = async (req, res) => {
-    const { url } = req.body;
+  const { url } = req.body;
 
-    if (!url) {
-        return res.status(400).json({ message: 'Website URL is required' });
+  if (!url) {
+    return res.status(400).json({ message: "Website URL is required" });
+  }
+
+  try {
+    // Fetch website content
+    const websiteContent = await fetchWebsiteContent(url);
+    const $ = cheerio.load(websiteContent);
+    const contentText = $("body").text();
+
+    // Detect predefined violation keywords
+    const keywordViolations = detectKeywordViolations(contentText);
+
+    // Respond with detected violations
+    if (keywordViolations.length > 0) {
+      res.status(200).json({
+        domain: url,
+        violations: keywordViolations,
+        message: `Policy violations found: ${keywordViolations.length} issues detected.`,
+      });
+    } else {
+      res.status(200).json({
+        domain: url,
+        message: "No policy violations detected.",
+      });
     }
+  } catch (error) {
+    console.error("Error analyzing website:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
-    try {
-        // Fetch website content
-        const { data } = await axios.get(url);
-        const $ = cheerio.load(data);
-        const websiteContent = $('body').text();
-
-        // Detect predefined violation keywords
-        const keywordViolations = detectKeywordViolations(websiteContent);
-
-        // Analyze content using OpenAI (AI-powered insight on pornographic content and abusive language)
-        const aiViolations = await analyzeWithAI(websiteContent);
-
-        // Combine both predefined and AI analysis results
-        const violations = [...keywordViolations, ...aiViolations];
-
-        if (violations.length > 0) {
-            res.status(200).json({
-                domain: url,
-                violations,
-                message: `Policy violations found: ${violations.length} issues detected.`,
-            });
-        } else {
-            res.status(200).json({
-                domain: url,
-                message: 'No policy violations detected.',
-            });
-        }
-
-    } catch (error) {
-        console.error('Error analyzing website:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
+// Fetch website content using Scraper API
+const fetchWebsiteContent = async (url) => {
+  try {
+    const response = await axios.get(SCRAPER_API_URL, {
+      params: {
+        api_key: SCRAPER_API_KEY,
+        url: url,
+        render: true, // To ensure dynamic content is loaded
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching website content:", error);
+    throw new Error("Error fetching website content");
+  }
 };
 
 // Detect predefined violations based on keywords
 const detectKeywordViolations = (content) => {
-    const detectedViolations = [];
- 
-    Object.keys(violationKeywords).forEach((violation) => {
-        const keywords = violationKeywords[violation];
-        const match = stringSimilarity.findBestMatch(content, keywords);
-        if (match.bestMatch.rating > 0.2) {
-            detectedViolations.push({
-                violationType: violation,
-                matchedKeyword: match.bestMatch.target,
-                description: `Content related to ${violation} was detected.`,
-            });
-        }
-    });
+  const detectedViolations = [];
 
-    return detectedViolations;
-};
-
-// AI-based analysis using OpenAI for more complex violations
-const analyzeWithAI = async (content) => {
-    try {
-        const aiResponse = await openai.Completion.create({
-            model: 'gpt-4',
-            prompt: `Analyze the following content for violations such as pornographic material or abusive language: \n\n"${content}"`,
-            max_tokens: 150,
+  Object.keys(violationKeywords).forEach((violation) => {
+    const keywords = violationKeywords[violation];
+    keywords.forEach((keyword) => {
+      if (content.toLowerCase().includes(keyword.toLowerCase())) {
+        detectedViolations.push({
+          violationType: violation,
+          matchedKeyword: keyword,
+          description: `Content related to ${violation} was detected.`,
         });
+      }
+    });
+  });
 
-        const aiAnalysis = aiResponse.choices[0].text.trim();
-        const detectedViolations = [];
-
-        // Simple checks for AI-generated insights
-        if (aiAnalysis.toLowerCase().includes('pornographic')) {
-            detectedViolations.push({
-                violationType: 'pornographic content',
-                description: 'AI detected possible pornographic content.'
-            });
-        }
-
-        if (aiAnalysis.toLowerCase().includes('abusive')) {
-            detectedViolations.push({
-                violationType: 'abusive language',
-                description: 'AI detected possible abusive language.'
-            });
-        }
-
-        return detectedViolations;
-    } catch (error) {
-        console.error('Error during AI analysis:', error);
-        return [];
-    }
+  return detectedViolations;
 };

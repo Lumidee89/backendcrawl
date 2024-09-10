@@ -1,80 +1,98 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const stringSimilarity = require('string-similarity');
+const axios = require("axios");
+const cheerio = require("cheerio");
+const stringSimilarity = require("string-similarity");
+const { google } = require("googleapis");
+const customsearch = google.customsearch("v1");
 
-const googleApiKey = 'AIzaSyCTjYQIUUyTDgty7bDdOn0ZQunf-ItIDWs';
-const customSearchEngineId = '00f00fecc2109450f';
+// Replace with your Scraper API key
+const SCRAPER_API_KEY = "934259ada971480167484c089f42b5ba";
+const SCRAPER_API_URL = "http://api.scraperapi.com";
+
+const GOOGLE_API_KEY = "AIzaSyCTjYQIUUyTDgty7bDdOn0ZQunf-ItIDWs";
+const GOOGLE_SEARCH_ENGINE_ID = "24c939fb91645401e";
+
+async function fetchSimilarContentFromGoogle(query) {
+  try {
+    const res = await customsearch.cse.list({
+      cx: GOOGLE_SEARCH_ENGINE_ID,
+      q: query,
+      key: GOOGLE_API_KEY,
+    });
+
+    // Ensure that 'items' is present in the response
+    if (!res.data || !res.data.items) {
+      throw new Error("No items found in the response");
+    }
+
+    // Map through the items to extract relevant details
+    return res.data.items.map((item) => ({
+      url: item.link,
+      similarityScore: 0.85, // Placeholder score; update logic as needed
+      detectionDate: new Date().toISOString(),
+    }));
+  } catch (error) {
+    console.error("Error searching Google Custom Search:", error);
+    throw new Error("Error searching Google Custom Search");
+  }
+}
+
+async function fetchWebsiteContent(url) {
+  try {
+    const response = await axios.get(SCRAPER_API_URL, {
+      params: {
+        api_key: SCRAPER_API_KEY,
+        url: url,
+        render: true,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching website content:", error);
+    throw new Error("Error fetching website content");
+  }
+}
 
 async function analyzeWebsite(url, referenceContent) {
-    try {
-        url = normalizeUrl(url);
+  try {
+    // Fetch website content
+    const websiteContent = await fetchWebsiteContent(url);
+    const $ = cheerio.load(websiteContent);
+    const bodyText = $("body").text();
 
-        const { data } = await axios.get(url);
-        const $ = cheerio.load(data);
-        const websiteContent = $('body').text();
+    // Calculate similarity score
+    const similarityScore = stringSimilarity.compareTwoStrings(
+      bodyText,
+      referenceContent
+    );
+    const impactScore = Math.min(100, bodyText.length / 100);
 
-        const similarityScore = stringSimilarity.compareTwoStrings(websiteContent, referenceContent);
-        const impactScore = Math.min(100, websiteContent.length / 100);
+    // Get similar content details
+    const similarContentDetails = await getSimilarContentDetails(bodyText);
 
-        const similarContentDetails = await getSimilarContentDetails(websiteContent, url);
-
-        return {
-            domain: url,
-            similarityScore,
-            impactScore,
-            similarContentDetails,
-            analysisDate: new Date().toISOString(),
-        };
-    } catch (error) {
-        console.error('Error analyzing website:', error);
-        throw new Error('Content analysis failed');
-    }
+    return {
+      domain: url,
+      similarityScore,
+      impactScore,
+      similarContentDetails,
+      analysisDate: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error("Error analyzing website:", error);
+    throw new Error("Content analysis failed");
+  }
 }
 
-function normalizeUrl(url) {
-    if (!/^https?:\/\//i.test(url)) {
-        url = `https://${url}`;
-    }
+async function getSimilarContentDetails(content) {
+  try {
+    // Limit query length to 512 characters
+    const query = encodeURIComponent(content.substring(0, 512));
+    const similarContent = await fetchSimilarContentFromGoogle(query);
 
-    return url;
+    return similarContent;
+  } catch (error) {
+    console.error("Error getting similar content details:", error);
+    throw new Error("Error getting similar content details");
+  }
 }
 
-async function getSimilarContentDetails(inputContent, domain) {
-    const similarContentDetails = [];
-    
-    try {
-        const searchQuery = `related:${domain}`;
-        const googleSearchUrl = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(searchQuery)}&key=${googleApiKey}&cx=${customSearchEngineId}`;
-        
-        const { data } = await axios.get(googleSearchUrl);
-        const searchResults = data.items || [];
-
-        for (const result of searchResults) {
-            const similarUrl = result.link;
-
-            try {
-                const { data } = await axios.get(similarUrl);
-                const $ = cheerio.load(data);
-                const similarContent = $('body').text();
-
-                const similarityScore = stringSimilarity.compareTwoStrings(inputContent, similarContent);
-
-                similarContentDetails.push({
-                    similarUrl,
-                    similarityScore,
-                    detectionDate: new Date().toISOString()
-                });
-            } catch (error) {
-                console.error(`Error analyzing similar website ${similarUrl}:`, error);
-            }
-        }
-    } catch (error) {
-        console.error('Error performing Google Custom Search:', error);
-    }
-
-    return similarContentDetails;
-}
-
-module.exports = {
-    analyzeWebsite,
-};
+module.exports = { analyzeWebsite };
