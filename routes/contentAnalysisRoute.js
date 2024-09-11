@@ -3,7 +3,7 @@ const router = express.Router();
 const { analyzeWebsite } = require("../controllers/contentAnalysis");
 
 router.get("/analyze", async (req, res) => {
-  const { url, referenceContent } = req.body;
+  const { url, referenceContent } = req.query;
 
   if (!url || !referenceContent) {
     return res
