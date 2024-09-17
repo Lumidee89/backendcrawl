@@ -4,20 +4,17 @@ const User = require("../models/User");
 exports.updateProfile = async (req, res) => {
   const { fullName, about, email, phoneNumber } = req.body;
 
-  console.log(req.user);
-
-  if (!req.userId) {
+  if (!req.user) {
     return res.status(401).json({ msg: "Unauthorized" });
   }
 
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    // Update the user profile fields
     user.fullName = fullName || user.fullName;
     user.about = about || user.about;
     user.email = email || user.email;
@@ -35,24 +32,22 @@ exports.updateProfile = async (req, res) => {
 exports.updatePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
-  if (!req.userId) {
+  if (!req.user) {
     return res.status(401).json({ msg: "Unauthorized" });
   }
 
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    // Check if current password matches
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ msg: "Current password is incorrect" });
     }
 
-    // Hash the new password and update it
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
 
@@ -66,18 +61,17 @@ exports.updatePassword = async (req, res) => {
 };
 
 exports.updateProfilePicture = async (req, res) => {
-  if (!req.userId) {
+  if (!req.user) {
     return res.status(401).json({ msg: "Unauthorized" });
   }
 
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    // Assuming the file is uploaded and its path is in req.file
     if (req.file) {
       user.profilePicture = req.file.path;
     }
@@ -92,12 +86,12 @@ exports.updateProfilePicture = async (req, res) => {
 };
 
 exports.deleteAccount = async (req, res) => {
-  if (!req.userId) {
+  if (!req.user) {
     return res.status(401).json({ msg: "Unauthorized" });
   }
 
   try {
-    const user = await User.findByIdAndDelete(req.userId);
+    const user = await User.findByIdAndDelete(req.user._id);
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });

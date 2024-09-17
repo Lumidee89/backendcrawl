@@ -2,11 +2,9 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const stringSimilarity = require("string-similarity");
 
-// Replace with your Scraper API key
-const SCRAPER_API_KEY = "934259ada971480167484c089f42b5ba";
-const SCRAPER_API_URL = "http://api.scraperapi.com";
+const SCRAPER_API_KEY = process.env.SCRAPER_API_KEY;
+const SCRAPER_API_URL = process.env.SCRAPER_API_URL;
 
-// Predefined policy violations and keywords
 const policyViolations = [
   "spam",
   "malware",
@@ -23,7 +21,6 @@ const violationKeywords = {
   abusive: ["hate speech", "offensive language"],
 };
 
-// Analyze website for policy violations using predefined keywords
 exports.checkViolations = async (req, res) => {
   const { url } = req.body;
 
@@ -32,15 +29,12 @@ exports.checkViolations = async (req, res) => {
   }
 
   try {
-    // Fetch website content
     const websiteContent = await fetchWebsiteContent(url);
     const $ = cheerio.load(websiteContent);
     const contentText = $("body").text();
 
-    // Detect predefined violation keywords
     const keywordViolations = detectKeywordViolations(contentText);
 
-    // Respond with detected violations
     if (keywordViolations.length > 0) {
       res.status(200).json({
         domain: url,
@@ -59,14 +53,13 @@ exports.checkViolations = async (req, res) => {
   }
 };
 
-// Fetch website content using Scraper API
 const fetchWebsiteContent = async (url) => {
   try {
     const response = await axios.get(SCRAPER_API_URL, {
       params: {
         api_key: SCRAPER_API_KEY,
         url: url,
-        render: true, // To ensure dynamic content is loaded
+        render: true, 
       },
     });
     return response.data;
@@ -76,7 +69,6 @@ const fetchWebsiteContent = async (url) => {
   }
 };
 
-// Detect predefined violations based on keywords
 const detectKeywordViolations = (content) => {
   const detectedViolations = [];
 
