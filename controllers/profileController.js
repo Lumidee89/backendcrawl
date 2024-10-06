@@ -9,11 +9,7 @@ exports.updateProfile = async (req, res) => {
   }
 
   try {
-    const user = await User.findById(req.user._id);
-
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
+    const user = req.user;
 
     user.fullName = fullName || user.fullName;
     user.about = about || user.about;
@@ -28,6 +24,7 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 };
+
 
 exports.updatePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
