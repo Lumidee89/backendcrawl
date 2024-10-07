@@ -16,22 +16,18 @@ require("dotenv").config();
 
 const app = express();
 
-// Connect to MongoDB
 connectDB();
 
-// Middleware
 app.use(express.json());
 
 app.use(checkBlockedIp);
 
-// Allowed CORS Origin
 const allowedOrigins = [
   "http://localhost:5173",
   "https://crawler-integration.netlify.app",
   "http://127.0.0.1:5173",
 ];
 
-// CORS Middleware
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -48,7 +44,6 @@ app.use(
   })
 );
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/whois", whoisRoutes);
 app.use("/api", contentAnalysisRoute);
@@ -63,23 +58,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-// const express = require('express');
-// const connectDB = require('./config/db');
-// const authRoutes = require('./routes/auth');
-// const whoisRoutes = require('./routes/whois');
-// require('dotenv').config();
-
-// const app = express();
-
-// connectDB();
-
-// app.use(express.json());
-
-// app.use('/api/auth', authRoutes);
-// app.use('/api/whois', whoisRoutes);
-
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, () => {
-//   console.log(`Server is running on http://localhost:${PORT}`);
-// });

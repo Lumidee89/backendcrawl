@@ -1,10 +1,9 @@
-const dns = require("dns");
+const dns = require("dns").promises; // Use promises-based dns
 const axios = require("axios");
 
-let ipData = {}; // To store detected IP information
-let blockedIps = new Set(); // To store blocked IPs
+let ipData = {}; 
+let blockedIps = new Set(); 
 
-// Analyze the website and store IP data along with location information
 exports.analyzeWebsite = async (req, res) => {
   const { website } = req.body;
 
@@ -15,57 +14,51 @@ exports.analyzeWebsite = async (req, res) => {
   }
 
   try {
-    dns.lookup(website, async (err, address, family) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ message: "Error resolving website IP", error: err });
-      }
+    const { address } = await dns.lookup(website);
 
-      // Check if the IP is already blocked
-      if (blockedIps.has(address)) {
-        return res.status(403).json({ message: "This IP is blocked" });
-      }
+    if (blockedIps.has(address)) {
+      return res.status(403).json({ message: "This IP is blocked" });
+    }
 
-      // Fetch location data based on IP address
-      const locationResponse = await axios.get(
-        `https://ipapi.co/${address}/json/`
-      );
-      const locationData = locationResponse.data;
+    const locationResponse = await axios.get(
+      `https://ipapi.co/${address}/json/`
+    );
+    const locationData = locationResponse.data;
 
-      if (!ipData[website]) {
-        ipData[website] = {
-          ipAddress: address,
-          accessCount: 0,
-          lastAccessed: new Date(),
-          logs: [],
-          location: locationData,
-        };
-      }
-
-      ipData[website].accessCount++;
-      ipData[website].lastAccessed = new Date();
-      ipData[website].logs.push({
+    if (!ipData[website]) {
+      ipData[website] = {
         ipAddress: address,
-        timestamp: new Date(),
+        accessCount: 0,
+        lastAccessed: new Date(),
+        logs: [],
         location: locationData,
-      });
+      };
+    }
 
-      res.json({
-        message: "Website analyzed successfully",
-        data: ipData[website],
-      });
+    ipData[website].accessCount++;
+    ipData[website].lastAccessed = new Date();
+    ipData[website].logs.push({
+      ipAddress: address,
+      timestamp: new Date(),
+      location: locationData,
     });
-    DD;
+
+    // Send the response only once
+    return res.json({
+      message: "Website analyzed successfully",
+      data: ipData[website],
+    });
+
   } catch (error) {
+    // Handle any errors that occur during the process
     return res.status(500).json({
       message: "An error occurred while analyzing the website",
-      error,
+      error: error.message,
     });
   }
 };
 
-// Get all IP data that has been detected
+
 exports.getIpData = (req, res) => {
   if (Object.keys(ipData).length === 0) {
     return res.status(404).json({ message: "No IP data available yet" });
@@ -76,7 +69,6 @@ exports.getIpData = (req, res) => {
 
 exports.blockedIps = blockedIps;
 
-// Block an IP address
 exports.blockIp = (req, res) => {
   const { ipAddress } = req.body;
 
@@ -86,7 +78,6 @@ exports.blockIp = (req, res) => {
       .json({ message: "Please provide a valid IP address" });
   }
 
-  // Add the IP address to the blocked list
   blockedIps.add(ipAddress);
 
   res.json({
@@ -94,12 +85,10 @@ exports.blockIp = (req, res) => {
   });
 };
 
-// Get all blocked IP addresses
 exports.getBlockedIps = (req, res) => {
   res.json({ blockedIps: Array.from(blockedIps) });
 };
 
-// Unblock an IP address
 exports.unblockIp = (req, res) => {
   const { ipAddress } = req.body;
 
@@ -113,7 +102,6 @@ exports.unblockIp = (req, res) => {
     return res.status(404).json({ message: "IP address is not blocked" });
   }
 
-  // Remove the IP from the blocked list
   blockedIps.delete(ipAddress);
 
   res.json({ message: `IP address ${ipAddress} has been unblocked` });
