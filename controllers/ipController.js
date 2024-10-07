@@ -1,4 +1,4 @@
-const dns = require("dns").promises; // Use promises-based dns
+const dns = require("dns").promises; 
 const axios = require("axios");
 
 let ipData = {}; 
@@ -43,14 +43,12 @@ exports.analyzeWebsite = async (req, res) => {
       location: locationData,
     });
 
-    // Send the response only once
     return res.json({
       message: "Website analyzed successfully",
       data: ipData[website],
     });
 
   } catch (error) {
-    // Handle any errors that occur during the process
     return res.status(500).json({
       message: "An error occurred while analyzing the website",
       error: error.message,
