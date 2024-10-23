@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const aiInsightsController = require('../controllers/aiInsightsController');
+import { analyzeDomain } from '../controllers/aiInsightsController.js';
 
-router.get('/aiinsights/:domain', aiInsightsController.analyzeDomain);
+router.get('/aiinsights/:domain', analyzeDomain);
 
-module.exports = router;
+export default router;

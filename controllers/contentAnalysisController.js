@@ -1,5 +1,5 @@
-const axios = require('axios');
-const { performance } = require('perf_hooks');
+import axios from 'axios';
+import { performance } from 'perf_hooks';
 
 // Function to analyze website speed
 const analyzeWebsiteSpeed = async (req, res) => {
@@ -32,6 +32,4 @@ const analyzeWebsiteSpeed = async (req, res) => {
     }
 };
 
-module.exports = {
-    analyzeWebsiteSpeed
-};
+export { analyzeWebsiteSpeed };

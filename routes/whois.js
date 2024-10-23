@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { lookup } = require('../controllers/whoisController');
+import { lookup } from '../controllers/whoisController.js';
 
 router.get('/:domain', lookup);
 
-module.exports = router;
+export default router;

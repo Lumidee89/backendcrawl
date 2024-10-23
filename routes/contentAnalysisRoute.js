@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { analyzeWebsite } = require("../controllers/contentAnalysis");
+import { analyzeWebsite } from "../controllers/contentAnalysis.js";
 
 router.get("/analyze", async (req, res) => {
   const { url, referenceContent } = req.query;
@@ -21,4 +21,4 @@ router.get("/analyze", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

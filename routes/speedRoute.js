@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { analyzeWebsiteSpeed } = require('../controllers/contentAnalysisController');
+import { analyzeWebsiteSpeed } from '../controllers/contentAnalysisController.js';
 
 router.post('/analyze', analyzeWebsiteSpeed);
 
-module.exports = router;
+export default router;

@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
 const authMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -9,17 +9,14 @@ const authMiddleware = async (req, res, next) => {
   }
 
   try {
-    // Verify the token and extract the userId from it
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Find the user based on the decoded userId
-    const user = await User.findById(decoded.userId).select('-password'); // Exclude password from the user object
+    const user = await User.findById(decoded.userId).select('-password');
 
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
 
-    // Attach the user object to the request
     req.user = user;
 
     next();
@@ -29,4 +26,4 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = authMiddleware;
+export default authMiddleware;

@@ -1,9 +1,10 @@
-require('dotenv').config();
-const axios = require('axios');
+import dotenv from 'dotenv';
+import axios from 'axios';
 
+dotenv.config();
 const apiKey = process.env.OPENAI_API_KEY;
 
-exports.analyzeDomain = async (req, res) => {
+const analyzeDomain = async (req, res) => {
     const { domain } = req.params;
 
     if (!domain) {
@@ -45,3 +46,5 @@ exports.analyzeDomain = async (req, res) => {
         return res.status(500).json({ msg: 'Error analyzing domain', error: error.message });
     }
 };
+
+export { analyzeDomain };

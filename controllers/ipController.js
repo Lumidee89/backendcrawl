@@ -1,16 +1,14 @@
-const dns = require("dns").promises; 
-const axios = require("axios");
+import { promises as dns } from 'dns';
+import axios from 'axios';
 
-let ipData = {}; 
-let blockedIps = new Set(); 
+let ipData = {};
+let blockedIps = new Set();
 
-exports.analyzeWebsite = async (req, res) => {
+export const analyzeWebsite = async (req, res) => {
   const { website } = req.body;
 
   if (!website) {
-    return res
-      .status(400)
-      .json({ message: "Please provide a valid website URL" });
+    return res.status(400).json({ message: "Please provide a valid website URL" });
   }
 
   try {
@@ -20,9 +18,7 @@ exports.analyzeWebsite = async (req, res) => {
       return res.status(403).json({ message: "This IP is blocked" });
     }
 
-    const locationResponse = await axios.get(
-      `https://ipapi.co/${address}/json/`
-    );
+    const locationResponse = await axios.get(`https://ipapi.co/${address}/json/`);
     const locationData = locationResponse.data;
 
     if (!ipData[website]) {
@@ -56,8 +52,7 @@ exports.analyzeWebsite = async (req, res) => {
   }
 };
 
-
-exports.getIpData = (req, res) => {
+export const getIpData = (req, res) => {
   if (Object.keys(ipData).length === 0) {
     return res.status(404).json({ message: "No IP data available yet" });
   }
@@ -65,15 +60,11 @@ exports.getIpData = (req, res) => {
   res.json({ ipData });
 };
 
-exports.blockedIps = blockedIps;
-
-exports.blockIp = (req, res) => {
+export const blockIp = (req, res) => {
   const { ipAddress } = req.body;
 
   if (!ipAddress) {
-    return res
-      .status(400)
-      .json({ message: "Please provide a valid IP address" });
+    return res.status(400).json({ message: "Please provide a valid IP address" });
   }
 
   blockedIps.add(ipAddress);
@@ -83,17 +74,15 @@ exports.blockIp = (req, res) => {
   });
 };
 
-exports.getBlockedIps = (req, res) => {
+export const getBlockedIps = (req, res) => {
   res.json({ blockedIps: Array.from(blockedIps) });
 };
 
-exports.unblockIp = (req, res) => {
+export const unblockIp = (req, res) => {
   const { ipAddress } = req.body;
 
   if (!ipAddress) {
-    return res
-      .status(400)
-      .json({ message: "Please provide a valid IP address" });
+    return res.status(400).json({ message: "Please provide a valid IP address" });
   }
 
   if (!blockedIps.has(ipAddress)) {
@@ -104,3 +93,5 @@ exports.unblockIp = (req, res) => {
 
   res.json({ message: `IP address ${ipAddress} has been unblocked` });
 };
+
+export { blockedIps };
