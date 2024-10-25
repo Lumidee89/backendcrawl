@@ -1,17 +1,11 @@
-import express from 'express';
+const express = require('express');
 const router = express.Router();
-import { 
-  analyzeWebsite,
-  getIpData,
-  blockIp,
-  unblockIp,
-  getBlockedIps
-} from '../controllers/ipController.js';
+const ipController = require('../controllers/ipController');
 
-router.post('/analyze-website', analyzeWebsite);
-router.get('/ip-analysis', getIpData);
-router.post('/block', blockIp);
-router.post('/unblock', unblockIp);
-router.get('/blocked-ips', getBlockedIps);
+router.post('/analyze-website', ipController.analyzeWebsite);
+router.get('/ip-analysis', ipController.getIpData);
+router.post('/block', ipController.blockIp);
+router.post('/unblock', ipController.unblockIp);
+router.get('/blocked-ips', ipController.getBlockedIps);
 
-export default router;
+module.exports = router;

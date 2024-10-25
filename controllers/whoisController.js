@@ -1,6 +1,6 @@
-import whois from 'whois';
+const whois = require('whois');
 
-export const lookup = (req, res) => {
+exports.lookup = (req, res) => {
   const { domain } = req.params;
 
   if (!domain) {
@@ -19,6 +19,7 @@ export const lookup = (req, res) => {
   });
 };
 
+// Helper function to format WHOIS data
 const formatWhoisData = (data) => {
   const lines = data.split('\n');
   const formattedData = {};
@@ -60,6 +61,7 @@ const formatWhoisData = (data) => {
   return cleanUpData(formattedData);
 };
 
+// Helper function to clean up and format the data
 const cleanUpData = (data) => {
   const cleanedData = {};
 

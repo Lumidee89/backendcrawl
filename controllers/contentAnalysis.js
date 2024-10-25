@@ -1,10 +1,9 @@
-import axios from "axios";
-import * as cheerio from 'cheerio';
-import stringSimilarity from "string-similarity";
-import { google } from "googleapis";
-const { customsearch } = google;
-import dotenv from 'dotenv';
-dotenv.config();
+const axios = require("axios");
+const cheerio = require("cheerio");
+const stringSimilarity = require("string-similarity");
+const { google } = require("googleapis");
+const customsearch = google.customsearch("v1");
+require('dotenv').config();
 
 const SCRAPER_API_KEY = process.env.SCRAPER_API_KEY;
 const SCRAPER_API_URL = process.env.SCRAPER_API_URL;
@@ -12,7 +11,7 @@ const SCRAPER_API_URL = process.env.SCRAPER_API_URL;
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 const GOOGLE_SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID;
 
-const fetchSimilarContentFromGoogle = async (query) => {
+async function fetchSimilarContentFromGoogle(query) {
   try {
     const res = await customsearch.cse.list({
       cx: GOOGLE_SEARCH_ENGINE_ID,
@@ -33,9 +32,9 @@ const fetchSimilarContentFromGoogle = async (query) => {
     console.error("Error searching Google Custom Search:", error);
     throw new Error("Error searching Google Custom Search");
   }
-};
+}
 
-const fetchWebsiteContent = async (url) => {
+async function fetchWebsiteContent(url) {
   try {
     const response = await axios.get(SCRAPER_API_URL, {
       params: {
@@ -49,9 +48,9 @@ const fetchWebsiteContent = async (url) => {
     console.error("Error fetching website content:", error);
     throw new Error("Error fetching website content");
   }
-};
+}
 
-const analyzeWebsite = async (url, referenceContent) => {
+async function analyzeWebsite(url, referenceContent) {
   try {
     const websiteContent = await fetchWebsiteContent(url);
     const $ = cheerio.load(websiteContent);
@@ -76,9 +75,9 @@ const analyzeWebsite = async (url, referenceContent) => {
     console.error("Error analyzing website:", error);
     throw new Error("Content analysis failed");
   }
-};
+}
 
-const getSimilarContentDetails = async (content) => {
+async function getSimilarContentDetails(content) {
   try {
     const query = encodeURIComponent(content.substring(0, 512));
     const similarContent = await fetchSimilarContentFromGoogle(query);
@@ -88,6 +87,6 @@ const getSimilarContentDetails = async (content) => {
     console.error("Error getting similar content details:", error);
     throw new Error("Error getting similar content details");
   }
-};
+}
 
-export { analyzeWebsite };
+module.exports = { analyzeWebsite };

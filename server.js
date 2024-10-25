@@ -1,20 +1,18 @@
-import express from "express";
-import cors from "cors";
-import connectDB from "./config/db.js";
-import authRoutes from "./routes/auth.js";
-import whoisRoutes from "./routes/whois.js";
-import contentAnalysisRoute from "./routes/contentAnalysisRoute.js";
-import ipRoutes from "./routes/ipRoutes.js";
-import checkBlockedIp from "./middleware/ipBlockMiddleware.js";
-import violationRoutes from "./routes/violationRoutes.js";
-import speedRoutes from "./routes/speedRoute.js";
-import adRoutes from "./routes/adRoutes.js";
-import aiInsightsRoutes from "./routes/aiInsightsRoutes.js";
-import profileRoutes from "./routes/profileRoutes.js";
+const express = require("express");
+const cors = require("cors");
+const connectDB = require("./config/db");
+const authRoutes = require("./routes/auth");
+const whoisRoutes = require("./routes/whois");
+const contentAnalysisRoute = require("./routes/contentAnalysisRoute");
+const ipRoutes = require("./routes/ipRoutes");
+const checkBlockedIp = require("./middleware/ipBlockMiddleware");
+const violationRoutes = require("./routes/violationRoutes");
+const speedRoutes = require("./routes/speedRoute");
+const adRoutes = require("./routes/adRoutes");
+const aiInsightsRoutes = require("./routes/aiInsightsRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 
-import dotenv from "dotenv";
-
-dotenv.config();
+require("dotenv").config();
 
 const app = express();
 

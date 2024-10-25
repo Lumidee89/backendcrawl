@@ -1,10 +1,10 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const contentAnalysisSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'User' 
+        ref: 'User' // Assuming you have a User model
     },
     website: {
         type: String,
@@ -22,6 +22,4 @@ const contentAnalysisSchema = new mongoose.Schema({
     }
 });
 
-const ContentAnalysis = mongoose.model('ContentAnalysis', contentAnalysisSchema);
-
-export default ContentAnalysis;
+module.exports = mongoose.model('ContentAnalysis', contentAnalysisSchema);

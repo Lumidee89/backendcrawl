@@ -1,7 +1,7 @@
-import express from 'express';
+const express = require('express');
 const router = express.Router();
-import { checkViolations } from '../controllers/violationController.js';
+const { checkViolations } = require('../controllers/violationController');
 
 router.post('/check-violations', checkViolations);
 
-export default router;
+module.exports = router;

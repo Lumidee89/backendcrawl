@@ -1,6 +1,6 @@
-import axios from "axios";
-import * as cheerio from 'cheerio';
-import stringSimilarity from "string-similarity";
+const axios = require("axios");
+const cheerio = require("cheerio");
+const stringSimilarity = require("string-similarity");
 
 const SCRAPER_API_KEY = process.env.SCRAPER_API_KEY;
 const SCRAPER_API_URL = process.env.SCRAPER_API_URL;
@@ -21,7 +21,7 @@ const violationKeywords = {
   abusive: ["hate speech", "offensive language"],
 };
 
-export const checkViolations = async (req, res) => {
+exports.checkViolations = async (req, res) => {
   const { url } = req.body;
 
   if (!url) {
@@ -59,7 +59,7 @@ const fetchWebsiteContent = async (url) => {
       params: {
         api_key: SCRAPER_API_KEY,
         url: url,
-        render: true,
+        render: true, 
       },
     });
     return response.data;

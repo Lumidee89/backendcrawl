@@ -1,19 +1,12 @@
-import express from 'express';
+const express = require('express');
 const router = express.Router();
-import { 
-  register,
-  verifyOtp,
-  login,
-  forgotPassword,
-  resetPassword,
-  resendOtp
-} from '../controllers/authcontroller.js';
+const authController = require('../controllers/authcontroller');
 
-router.post('/register', register);
-router.post('/verify-otp', verifyOtp);
-router.post('/login', login);
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
-router.get('/resend-otp/:email', resendOtp);
+router.post('/register', authController.register);
+router.post('/verify-otp', authController.verifyOtp);
+router.post('/login', authController.login);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
+router.get('/resend-otp/:email', authController.resendOtp);
 
-export default router;
+module.exports = router;

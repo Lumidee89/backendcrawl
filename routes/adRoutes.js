@@ -1,7 +1,7 @@
-import express from 'express';
+const express = require('express');
 const router = express.Router();
-import { analyzeAds } from '../controllers/adController.js';
+const adController = require('../controllers/adController');
 
-router.get('/analyze-ads/:domain', analyzeAds);
+router.get('/analyze-ads/:domain', adController.analyzeAds);
 
-export default router;
+module.exports = router;

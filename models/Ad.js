@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const AdSchema = new mongoose.Schema({
   domain: { type: String, required: true },
@@ -19,4 +19,4 @@ const AdSchema = new mongoose.Schema({
 
 const Ad = mongoose.model('Ad', AdSchema);
 
-export default Ad;
+module.exports = Ad;

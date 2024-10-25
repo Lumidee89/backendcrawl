@@ -1,10 +1,11 @@
-import transporter from '../config/smtp.js';
+// services/email.js
+const transporter = require('../config/smtp');
 
 const sendEmail = async (to, subject, text) => {
   try {
     await transporter.sendMail({
-      from: process.env.FROM_EMAIL,
-      to,
+      from: process.env.FROM_EMAIL, // Sender's email address
+      to, // Recipient's email address
       subject,
       text,
     });
@@ -14,4 +15,4 @@ const sendEmail = async (to, subject, text) => {
   }
 };
 
-export default sendEmail;
+module.exports = sendEmail;

@@ -1,7 +1,7 @@
-import bcrypt from "bcryptjs";
-import User from "../models/User.js";
+const bcrypt = require("bcryptjs");
+const User = require("../models/User");
 
-export const updateProfile = async (req, res) => {
+exports.updateProfile = async (req, res) => {
   const { fullName, about, email, phoneNumber } = req.body;
 
   if (!req.user) {
@@ -25,7 +25,8 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-export const updatePassword = async (req, res) => {
+
+exports.updatePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   if (!req.user) {
@@ -56,7 +57,7 @@ export const updatePassword = async (req, res) => {
   }
 };
 
-export const updateProfilePicture = async (req, res) => {
+exports.updateProfilePicture = async (req, res) => {
   if (!req.user) {
     return res.status(401).json({ msg: "Unauthorized" });
   }
@@ -81,7 +82,7 @@ export const updateProfilePicture = async (req, res) => {
   }
 };
 
-export const deleteAccount = async (req, res) => {
+exports.deleteAccount = async (req, res) => {
   if (!req.user) {
     return res.status(401).json({ msg: "Unauthorized" });
   }
