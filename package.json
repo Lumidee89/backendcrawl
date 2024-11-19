@@ -26,6 +26,7 @@
     "nodemailer": "^6.9.14",
     "openai": "^4.56.0",
     "string-similarity": "^4.0.4",
-    "whois": "^2.14.2"
+    "whois": "^2.14.2",
+    "whoiser": "^1.18.0"
   }
 }
