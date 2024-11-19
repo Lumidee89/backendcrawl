@@ -1,5 +1,4 @@
 const whois = require('whois');
-const DomainDetails = require('../models/domainDetails');
 
 const whoisServers = {
   '.in': 'whois.registry.in',
@@ -15,31 +14,19 @@ exports.lookup = (req, res) => {
   if (!domain) {
     return res.status(400).json({ msg: 'Domain is required' });
   }
-  if (!req.user || !req.user._id) {
-    return res.status(401).json({ msg: 'Unauthorized. Please login to save domain details' });
-  }
+
   const tld = domain.slice(domain.lastIndexOf('.'));
   const whoisServer = whoisServers[tld];
   const options = whoisServer ? { server: whoisServer } : undefined;
+
   whois.lookup(domain, options, (err, data) => {
     if (err) {
       return res.status(500).json({ msg: 'Error performing WHOIS lookup', error: err });
     }
+
     const formattedData = formatWhoisData(data);
-    const domainDetails = new DomainDetails({
-      domain,
-      whoisData: formattedData,
-      user: req.user._id,
-    });
-    domainDetails
-      .save()
-      .then((savedDomain) => {
-        res.status(200).json({ domain, whoisData: formattedData, savedDomain });
-      })
-      .catch((error) => {
-        console.error('Error saving domain details:', error);
-        res.status(500).json({ msg: 'Error saving domain details to the database' });
-      });
+
+    res.status(200).json({ domain, whoisData: formattedData });
   });
 };
 
