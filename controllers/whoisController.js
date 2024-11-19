@@ -1,4 +1,5 @@
 const whois = require('whois');
+const DomainDetails = require('../models/domainDetails');
 
 exports.lookup = (req, res) => {
   const { domain } = req.params;
@@ -7,19 +8,34 @@ exports.lookup = (req, res) => {
     return res.status(400).json({ msg: 'Domain is required' });
   }
 
+  if (!req.user || !req.user._id) {
+    return res.status(401).json({ msg: 'Unauthorized. Please login to save domain details' });
+  }
+
   whois.lookup(domain, (err, data) => {
     if (err) {
       return res.status(500).json({ msg: 'Error performing WHOIS lookup', error: err });
     }
 
-    // Format the raw data into a structured JSON object
     const formattedData = formatWhoisData(data);
 
-    res.status(200).json({ domain, whoisData: formattedData });
+    const domainDetails = new DomainDetails({
+      domain,
+      whoisData: formattedData,
+      user: req.user._id
+    });
+
+    domainDetails.save()
+      .then(savedDomain => {
+        res.status(200).json({ domain, whoisData: formattedData, savedDomain });
+      })
+      .catch(error => {
+        console.error('Error saving domain details:', error);
+        res.status(500).json({ msg: 'Error saving domain details to the database' });
+      });
   });
 };
 
-// Helper function to format WHOIS data
 const formatWhoisData = (data) => {
   const lines = data.split('\n');
   const formattedData = {};
@@ -30,7 +46,6 @@ const formatWhoisData = (data) => {
     const formattedValue = value.join(':').trim();
 
     if (formattedKey) {
-      // Handle known WHOIS fields
       switch (formattedKey) {
         case 'Domain Name':
         case 'Registrar':
@@ -61,7 +76,6 @@ const formatWhoisData = (data) => {
   return cleanUpData(formattedData);
 };
 
-// Helper function to clean up and format the data
 const cleanUpData = (data) => {
   const cleanedData = {};
 
