@@ -17,7 +17,20 @@ const violationKeywords = {
   spam: ["buy now", "click here", "free money"],
   malware: ["download trojan", "install virus"],
   phishing: ["enter your credit card", "password reset"],
-  pornographic: ["explicit content", "adult videos"],
+  pornographic: [
+    "explicit content",
+    "adult videos",
+    "sex",
+    "porn",
+    "xxx",
+    "nude",
+    "erotic",
+    "fetish",
+    "hardcore",
+    "pornographic",
+    "4dult",
+    "18+",
+  ],
   abusive: ["hate speech", "offensive language"],
 };
 
@@ -31,7 +44,9 @@ exports.checkViolations = async (req, res) => {
   try {
     const websiteContent = await fetchWebsiteContent(url);
     const $ = cheerio.load(websiteContent);
-    const contentText = $("body").text();
+    const contentText = decodeHtmlEntities($("body").text());
+
+    console.log("Fetched Website Content Preview:", contentText.slice(0, 500));
 
     const keywordViolations = detectKeywordViolations(contentText);
 
@@ -53,16 +68,20 @@ exports.checkViolations = async (req, res) => {
   }
 };
 
+const decodeHtmlEntities = (text) => {
+  return text.replace(/&#(\d+);/g, (match, num) => String.fromCharCode(num));
+};
+
 const fetchWebsiteContent = async (url) => {
   try {
     const response = await axios.get(SCRAPER_API_URL, {
       params: {
         api_key: SCRAPER_API_KEY,
         url: url,
-        render: true, 
+        render: true,
       },
     });
-    return response.data;
+    return decodeHtmlEntities(response.data);
   } catch (error) {
     console.error("Error fetching website content:", error);
     throw new Error("Error fetching website content");
@@ -71,11 +90,16 @@ const fetchWebsiteContent = async (url) => {
 
 const detectKeywordViolations = (content) => {
   const detectedViolations = [];
+  const lowerContent = content.toLowerCase();
 
   Object.keys(violationKeywords).forEach((violation) => {
     const keywords = violationKeywords[violation];
     keywords.forEach((keyword) => {
-      if (content.toLowerCase().includes(keyword.toLowerCase())) {
+      const similarity = stringSimilarity.compareTwoStrings(
+        lowerContent,
+        keyword.toLowerCase()
+      );
+      if (lowerContent.includes(keyword.toLowerCase()) || similarity > 0.8) {
         detectedViolations.push({
           violationType: violation,
           matchedKeyword: keyword,
@@ -84,6 +108,5 @@ const detectKeywordViolations = (content) => {
       }
     });
   });
-
   return detectedViolations;
 };

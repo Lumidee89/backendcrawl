@@ -25,6 +25,7 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.14",
     "openai": "^4.56.0",
+    "puppeteer": "^23.8.0",
     "string-similarity": "^4.0.4",
     "whois": "^2.14.2",
     "whoiser": "^1.18.0"
