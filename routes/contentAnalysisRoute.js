@@ -11,11 +11,13 @@ const isValidUrl = (url) => {
   }
 };
 
-router.get("/analyze", async (req, res) => {
-  const { url, referenceContent } = req.query;
+router.post("/analyze", async (req, res) => {
+  const { url, referenceContent } = req.body;
 
   if (!url || !referenceContent) {
-    return res.status(400).json({ error: "URL and reference content are required" });
+    return res
+      .status(400)
+      .json({ error: "URL and reference content are required" });
   }
 
   if (!isValidUrl(url)) {
