@@ -7,6 +7,9 @@ const whoisServers = {
   ".ca": "whois.cira.ca",
   ".jp": "whois.jprs.jp",
   ".cn": "whois.cnnic.cn",
+  ".com": "whois.verisign-grs.com",
+  ".org": "whois.pir.org", 
+  ".ng": "whois.nic.net.ng", 
 };
 
 exports.lookup = (req, res) => {
