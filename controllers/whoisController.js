@@ -8,7 +8,7 @@ const whoisServers = {
   ".jp": "whois.jprs.jp",
   ".cn": "whois.cnnic.cn",
   ".com": "whois.verisign-grs.com",
-  ".org": "whois.pir.org", 
+  ".org": "whois.pir.org",
   ".ng": "whois.nic.net.ng",
   ".net": "whois.verisign-grs.com",
 };
